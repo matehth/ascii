@@ -10,8 +10,13 @@ def get_pixel_matrix(image):
     return [pixels[i:i + image.width] for i in range(0, len(pixels), image.width)]
 
 
-def get_brightness_matrix(image):
+def get_brightness_matrix(image, char_set):
     pixel_matrix = get_pixel_matrix(image)
+
+    if char_set == ASCII_CHARS_SHORT:
+        div = 9
+    else:
+        div = 3
 
     brightness_matrix = []
     for x in range(len(pixel_matrix)):
@@ -19,20 +24,25 @@ def get_brightness_matrix(image):
         for y in range(len(pixel_matrix[x])):
             col.append(round((pixel_matrix[x][y][0] +
                               pixel_matrix[x][y][1] +
-                              pixel_matrix[x][y][2]) / 3))
+                              pixel_matrix[x][y][2]) / div))
         brightness_matrix.append(col)
 
     return brightness_matrix
 
 
-def invert_brightness(image):
-    brightness_matrix = get_brightness_matrix(image)
+def invert_brightness(image, char_set):
+    brightness_matrix = get_brightness_matrix(image, char_set)
+
+    if char_set == ASCII_CHARS_SHORT:
+        max_brightness = 85
+    else:
+        max_brightness = 255
 
     inverted_matrix = []
     for x in range(len(brightness_matrix)):
         col = []
         for y in range(len(brightness_matrix[x])):
-            col.append(abs(brightness_matrix[x][y] - 255))
+            col.append(abs(brightness_matrix[x][y] - max_brightness))
         inverted_matrix.append(col)
 
     return inverted_matrix
@@ -40,9 +50,9 @@ def invert_brightness(image):
 
 def get_char_matrix(image, char_set, inverted=False):
     if inverted:
-        brightness_matrix = invert_brightness(image)
+        brightness_matrix = invert_brightness(image, char_set)
     else:
-        brightness_matrix = get_brightness_matrix(image)
+        brightness_matrix = get_brightness_matrix(image, char_set)
 
     qt = round(MAX_BRIGHTNESS / len(char_set))
 
@@ -70,7 +80,6 @@ def print_ascii(image, char_set, inverted=False):
 
 if __name__ == "__main__":
     img = Image.open("aga.jpg")
-    img.thumbnail((40, 40))
+    img.thumbnail((50, 50))
 
-    # Only works with the long char set
-    print_ascii(img, ASCII_CHARS_LONG)
+    print_ascii(img, ASCII_CHARS_SHORT)
